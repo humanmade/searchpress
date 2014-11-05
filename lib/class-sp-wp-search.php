@@ -196,6 +196,37 @@ class SP_WP_Search extends SP_Search {
 			}
 		}
 
+		// post_meta
+		if ( ! empty( $args['post_meta'] ) ) {
+			foreach ( $args['post_meta'] as $meta_query ) {
+
+				if ( $meta_query['compare'] === '=' ) {
+					$filters[] = array( 'term' => array( 'post_meta.' . $meta_query['key'] . '.value' => $meta_query['value'] ) );	
+				} else if ( in_array( $meta_query['compare'], array( '>', '>=', '<', '<=' ) ) ) {
+
+					$es_compare_map = array(
+						'>'  => 'gt',
+						'>=' => 'gte',
+						'<'  => 'lt',
+						'<=' => 'lte'
+					);
+
+					$es_type_map = array(
+						'DECIMAL' => 'double',
+						'NUMERIC' => 'double',
+						'CHAR'    => 'value'
+ 					);
+
+					$filters[] = array( 
+						'range' => array( 
+							'post_meta.' . $meta_query['key'] . '.' . $es_type_map[$meta_query['type']] => array( $es_compare_map[$meta_query['compare']] => $meta_query['value'] ) 
+						)
+					);	
+				}
+				
+			}	
+		}
+
 		if ( ! empty( $filters ) ) {
 			$es_query_args['filter'] = array( 'and' => $filters );
 		}

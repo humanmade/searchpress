@@ -279,6 +279,10 @@ class SP_Integration {
 			$es_wp_query_args['date_range']['field'] = 'post_date';
 		}
 
+		// Meta query
+		if ( $query->get( 'meta_query' ) && $query->meta_query->relation === 'AND' ) {
+			$es_wp_query_args['post_meta'] = $query->meta_query->queries;
+		}
 
 		/** Ordering */
 		// Set results sorting
